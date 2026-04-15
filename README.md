@@ -1,5 +1,6 @@
 # HIPOLITO_JAN-WILFRED_-SHOPPING-CART-ACTIVITY-
-This is my take on quiz 2 and 3 on computer programming 2 where I created a simple shopping cart system
+This is my take on quiz 2 and 3 on computer programming 2 where I created a simple shopping cart system. Before coding, I first drafted the steps and features I needed, like the menu, input validation, cart system, and discount logic, so I wouldn’t get lost while coding. I then implemented it step-by-step through commits to track my progress and make sure each part was working properly. I also added a Harry Potter theme to make the program more creative and engaging.
+
 
 Features
 Shows a list of products with price and stock
