@@ -1,13 +1,10 @@
-namespace ShoppingCartSystem
+public class CartItem
 {
-    class CartItem
-    {
-        public Product Product;
-        public int Quantity;
+    public Product Product;
+    public int Quantity;
 
-        public double GetSubtotal()
-        {
-            return Product.Price * Quantity;
-        }
+    public double GetSubtotal()
+    {
+        return Product.Price * Quantity;
     }
 }
