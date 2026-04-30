@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 class Product
 {
@@ -39,8 +38,7 @@ class Program
 {
     static void Main()
     {
-        // Harry Potter themed products
-        Product[] products = new Product[]
+        Product[] products =
         {
             new Product { Id = 1, Name = "Elder Wand", Price = 4000, RemainingStock = 3 },
             new Product { Id = 2, Name = "Invisibility Cloak", Price = 3500, RemainingStock = 5 },
@@ -49,7 +47,10 @@ class Program
             new Product { Id = 5, Name = "Chocolate Frog", Price = 200, RemainingStock = 20 }
         };
 
-        List<CartItem> cart = new List<CartItem>();
+        //  FIX: Use fixed-size cart array
+        CartItem[] cart = new CartItem[10];
+        int cartCount = 0;
+
         string choice = "Y";
 
         Console.WriteLine("✨ Welcome to Diagon Alley Shop ✨");
@@ -63,11 +64,17 @@ class Program
                 products[i].DisplayProduct();
             }
 
-            Console.Write("\nEnter product number: ");
-            string input1 = Console.ReadLine();
+            //  FIX: Cart full check
+            if (cartCount >= cart.Length)
+            {
+                Console.WriteLine("⚠ Cart is full!");
+                break;
+            }
 
+            Console.Write("\nEnter product number: ");
             int productId;
-            if (!int.TryParse(input1, out productId) || productId < 1 || productId > products.Length)
+
+            if (!int.TryParse(Console.ReadLine(), out productId) || productId < 1 || productId > products.Length)
             {
                 Console.WriteLine("⚠ Invalid product number.");
                 continue;
@@ -82,10 +89,9 @@ class Program
             }
 
             Console.Write("Enter quantity: ");
-            string input2 = Console.ReadLine();
-
             int qty;
-            if (!int.TryParse(input2, out qty) || qty <= 0)
+
+            if (!int.TryParse(Console.ReadLine(), out qty) || qty <= 0)
             {
                 Console.WriteLine("⚠ Invalid quantity.");
                 continue;
@@ -97,24 +103,25 @@ class Program
                 continue;
             }
 
-            // Check if item already in cart
-            CartItem existing = null;
+            //  CHECK EXISTING ITEM
+            int index = -1;
 
-            foreach (var item in cart)
+            for (int i = 0; i < cartCount; i++)
             {
-                if (item.Product.Id == selected.Id)
+                if (cart[i].Product.Id == selected.Id)
                 {
-                    existing = item;
+                    index = i;
                 }
             }
 
-            if (existing != null)
+            if (index != -1)
             {
-                existing.Quantity += qty;
+                cart[index].Quantity += qty;
             }
             else
             {
-                cart.Add(new CartItem { Product = selected, Quantity = qty });
+                cart[cartCount] = new CartItem { Product = selected, Quantity = qty };
+                cartCount++;
             }
 
             selected.DeductStock(qty);
@@ -125,16 +132,17 @@ class Program
             choice = Console.ReadLine();
         }
 
-        // Receipt
+        // RECEIPT
         double total = 0;
 
         Console.WriteLine("\n=== 🧾 RECEIPT ===");
 
-        foreach (var item in cart)
+        for (int i = 0; i < cartCount; i++)
         {
-            double subtotal = item.GetSubtotal();
+            double subtotal = cart[i].GetSubtotal();
             total += subtotal;
-            Console.WriteLine(item.Product.Name + " x" + item.Quantity + " = ₱" + subtotal);
+
+            Console.WriteLine(cart[i].Product.Name + " x" + cart[i].Quantity + " = ₱" + subtotal);
         }
 
         Console.WriteLine("\nGrand Total: ₱" + total);
