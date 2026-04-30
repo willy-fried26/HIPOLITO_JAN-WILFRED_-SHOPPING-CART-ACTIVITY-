@@ -294,3 +294,7 @@ class Program
         }
     }
 }
+
+//Add cart management menu
+//Add payment validation
+//Add receipt system
