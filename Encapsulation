@@ -1,0 +1,270 @@
+using System;
+
+class Product
+{
+    private int id;
+    private string name;
+    private double price;
+    private int stock;
+    private string category;
+
+    public int Id { get => id; set => id = value; }
+    public string Name { get => name; set => name = value; }
+    public double Price { get => price; set => price = value; }
+    public int Stock { get => stock; set => stock = value; }
+    public string Category { get => category; set => category = value; }
+
+    public void Display()
+    {
+        Console.WriteLine($"{Id}. {Name} - ₱{Price} ({Category}) | Stock: {Stock}");
+    }
+}
+
+class CartItem
+{
+    public Product Product { get; set; }
+    public int Quantity { get; set; }
+
+    public double GetSubtotal()
+    {
+        return Product.Price * Quantity;
+    }
+}
+
+class Program
+{
+    static Product[] products;
+    static CartItem[] cart = new CartItem[20];
+    static int cartCount = 0;
+
+    static int receiptNo = 1;
+
+    static void Main()
+    {
+        InitializeProducts();
+        ShowWelcome();
+
+        bool running = true;
+
+        while (running)
+        {
+            ShowMenu();
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    ShowProducts();
+                    AddToCartFlow();
+                    break;
+
+                case "2":
+                    SearchProduct();
+                    break;
+
+                case "3":
+                    FilterCategory();
+                    break;
+
+                case "4":
+                    ViewCart();
+                    break;
+
+                case "5":
+                    Checkout();
+                    break;
+
+                case "0":
+                    running = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
+        }
+
+        Console.WriteLine("\nThank you for using Barangay Mini Mart System!");
+    }
+
+    static void InitializeProducts()
+    {
+        products = new Product[]
+        {
+            new Product { Id=1, Name="Rice", Price=60, Stock=20, Category="Food" },
+            new Product { Id=2, Name="Tuna", Price=35, Stock=15, Category="Food" },
+            new Product { Id=3, Name="Shampoo", Price=120, Stock=10, Category="Care" },
+            new Product { Id=4, Name="Toothpaste", Price=85, Stock=12, Category="Care" },
+            new Product { Id=5, Name="Soda", Price=50, Stock=25, Category="Drink" }
+        };
+    }
+
+    static void ShowWelcome()
+    {
+        Console.WriteLine("=================================");
+        Console.WriteLine("   BARANGAY MINI MART SYSTEM");
+        Console.WriteLine("=================================\n");
+    }
+
+    static void ShowMenu()
+    {
+        Console.WriteLine("\n=== MAIN MENU ===");
+        Console.WriteLine("1. View Products & Add to Cart");
+        Console.WriteLine("2. Search Product");
+        Console.WriteLine("3. Filter by Category");
+        Console.WriteLine("4. View Cart");
+        Console.WriteLine("5. Checkout");
+        Console.WriteLine("0. Exit");
+        Console.Write("Select: ");
+    }
+
+    static void ShowProducts()
+    {
+        Console.WriteLine("\n--- PRODUCT LIST ---");
+
+        foreach (var p in products)
+            p.Display();
+    }
+
+    static void AddToCartFlow()
+    {
+        Console.Write("\nEnter Product ID: ");
+        int id = int.Parse(Console.ReadLine());
+
+        Product selected = GetProductById(id);
+
+        if (selected == null)
+        {
+            Console.WriteLine("Product not found.");
+            return;
+        }
+
+        Console.Write("Enter Quantity: ");
+        int qty = int.Parse(Console.ReadLine());
+
+        if (qty <= 0 || qty > selected.Stock)
+        {
+            Console.WriteLine("Invalid quantity or not enough stock.");
+            return;
+        }
+
+        AddToCart(selected, qty);
+        selected.Stock -= qty;
+
+        Console.WriteLine("✔ Added to cart successfully!");
+    }
+
+    static Product GetProductById(int id)
+    {
+        foreach (var p in products)
+            if (p.Id == id)
+                return p;
+
+        return null;
+    }
+
+    static void AddToCart(Product p, int qty)
+    {
+        for (int i = 0; i < cartCount; i++)
+        {
+            if (cart[i].Product.Id == p.Id)
+            {
+                cart[i].Quantity += qty;
+                return;
+            }
+        }
+
+        cart[cartCount++] = new CartItem
+        {
+            Product = p,
+            Quantity = qty
+        };
+    }
+
+    static void SearchProduct()
+    {
+        Console.Write("\nSearch: ");
+        string key = Console.ReadLine().ToLower();
+
+        foreach (var p in products)
+        {
+            if (p.Name.ToLower().Contains(key))
+                p.Display();
+        }
+    }
+
+    static void FilterCategory()
+    {
+        Console.Write("\nEnter Category (Food/Care/Drink): ");
+        string cat = Console.ReadLine();
+
+        foreach (var p in products)
+        {
+            if (p.Category.Equals(cat, StringComparison.OrdinalIgnoreCase))
+                p.Display();
+        }
+    }
+
+    static void ViewCart()
+    {
+        Console.WriteLine("\n--- CART ---");
+
+        if (cartCount == 0)
+        {
+            Console.WriteLine("Cart is empty.");
+            return;
+        }
+
+        for (int i = 0; i < cartCount; i++)
+        {
+            Console.WriteLine($"{cart[i].Product.Name} x{cart[i].Quantity} = ₱{cart[i].GetSubtotal()}");
+        }
+    }
+
+    static void Checkout()
+    {
+        if (cartCount == 0)
+        {
+            Console.WriteLine("Cart is empty.");
+            return;
+        }
+
+        double total = 0;
+
+        Console.WriteLine("\n===== RECEIPT =====");
+        Console.WriteLine($"Receipt #: {receiptNo:0000}");
+        Console.WriteLine($"Date: {DateTime.Now}\n");
+
+        for (int i = 0; i < cartCount; i++)
+        {
+            double subtotal = cart[i].GetSubtotal();
+            total += subtotal;
+
+            Console.WriteLine($"{cart[i].Product.Name} x{cart[i].Quantity} = ₱{subtotal}");
+        }
+
+        double discount = total >= 1000 ? total * 0.05 : 0;
+        double finalTotal = total - discount;
+
+        Console.WriteLine("\n-------------------");
+        Console.WriteLine($"Total: ₱{total}");
+        Console.WriteLine($"Discount: ₱{discount}");
+        Console.WriteLine($"Final: ₱{finalTotal}");
+
+        double payment;
+
+        do
+        {
+            Console.Write("Payment: ");
+        }
+        while (!double.TryParse(Console.ReadLine(), out payment) || payment < finalTotal);
+
+        Console.WriteLine($"Change: ₱{payment - finalTotal}");
+
+        receiptNo++;
+        cartCount = 0;
+
+        Console.WriteLine("\n✔ Transaction Complete!");
+    }
+}
